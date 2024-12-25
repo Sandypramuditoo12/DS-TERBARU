@@ -1,4 +1,3 @@
-!pip install xgboost
 import streamlit as st
 import pickle
 import numpy as np
@@ -12,10 +11,10 @@ def load_model(file_path):
 
 st.title("Cek Hotel Berdasarkan Rating dan Jumlah Review")
 
-# Membuat 5 textfield untuk input
-input0 = st.text_input("Nama Hotel", placeholder="")
-input1 = st.text_input("Rating", placeholder="")
-input2 = st.text_input("Jumlah Review", placeholder="")
+# Membuat input form
+input0 = st.text_input("Nama Hotel", placeholder="Masukkan nama hotel")
+input1 = st.text_input("Rating", placeholder="Masukkan rating (angka)")
+input2 = st.text_input("Jumlah Review", placeholder="Masukkan jumlah review (angka)")
 
 # Mapping prediksi ke pesan
 def interpret_prediction(prediction_value):
@@ -28,28 +27,33 @@ def interpret_prediction(prediction_value):
     }
     return messages.get(prediction_value, "Hasil prediksi tidak valid.")
 
-
 # Tombol untuk submit data
 if st.button("Cek"):
     try:
         # Validasi input - memastikan semua input diisi
-        if not (input1 and input2):
+        if not (input0 and input1 and input2):
             st.error("Harap isi semua input!")
-        else:            
+        else:
             # Konversi input ke format numerik
-            input_data = np.array([float(input1), float(input2)]).reshape(1, -1)
+            try:
+                input_data = np.array([float(input1), float(input2)]).reshape(1, -1)
+            except ValueError:
+                st.error("Rating dan Jumlah Review harus berupa angka!")
+                st.stop()
 
-            # Memuat model dari file yang diunggah
-            model_path = 'hotel.pkl'  # Lokasi file yang diunggah
+            # Memuat model dari file
+            model_path = 'hotel.pkl'  # Lokasi file model
             classifier = load_model(model_path)
-            
+
             # Melakukan prediksi
             prediction = classifier.predict(input_data)
-            
+
             # Menafsirkan hasil prediksi
             result_message = interpret_prediction(prediction[0])
-            
+
             # Menampilkan hasil prediksi
             st.success(f"{input0} {result_message}")
+    except FileNotFoundError:
+        st.error("File model 'hotel.pkl' tidak ditemukan. Pastikan file tersedia di direktori.")
     except Exception as e:
         st.error(f"Terjadi kesalahan: {e}")
