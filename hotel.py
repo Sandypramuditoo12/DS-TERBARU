@@ -13,7 +13,7 @@ st.title("Cek Hotel Berdasarkan Rating dan Jumlah Review")
 
 # Membuat input form
 input0 = st.text_input("Nama Hotel", placeholder="Masukkan nama hotel")
-input1 = st.text_input("Rating", placeholder="Masukkan rating (angka)")
+input1 = st.text_input("Rating", placeholder="Masukkan rating (angka antara 1 dan 10)")
 input2 = st.text_input("Jumlah Review", placeholder="Masukkan jumlah review (angka)")
 
 # Mapping prediksi ke pesan
@@ -34,9 +34,16 @@ if st.button("Cek"):
         if not (input0 and input1 and input2):
             st.error("Harap isi semua input!")
         else:
-            # Konversi input ke format numerik
+            # Konversi input ke format numerik dan validasi range rating
             try:
-                input_data = np.array([float(input1), float(input2)]).reshape(1, -1)
+                rating = float(input1)
+                jumlah_review = float(input2)
+
+                if rating < 1 or rating > 10:
+                    st.error("Rating harus berada dalam rentang 1 hingga 10!")
+                    st.stop()
+
+                input_data = np.array([rating, jumlah_review]).reshape(1, -1)
             except ValueError:
                 st.error("Rating dan Jumlah Review harus berupa angka!")
                 st.stop()
